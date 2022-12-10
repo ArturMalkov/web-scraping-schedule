@@ -7,3 +7,4 @@ class Product(Model):
 
     asin = columns.Text(primary_key=True, required=True)  # 'asin' stands for 'Amazon shipping id number'
     title = columns.Text()
+    price_str = columns.Text(default="-1")
