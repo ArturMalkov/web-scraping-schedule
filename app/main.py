@@ -28,7 +28,7 @@ def list_all_products():
 def list_product(asin: str):
     data = dict(models.Product.objects.get(asin=asin))
     events = list(schema.ProductScrapeEventDetailSchema(**scrape_event)
-                  for scrape_event in models.ProductScrapeEvent.objects().filter(asin=asin).all())
+                  for scrape_event in models.ProductScrapeEvent.objects().filter(asin=asin).limit(5))
     data["events"] = events
     return data
 
