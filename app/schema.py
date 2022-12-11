@@ -9,7 +9,21 @@ class ProductSchema(BaseModel):
     title: Optional[str]
 
 
+class ProductListSchema(BaseModel):
+    asin: str
+    title: Optional[str]
+    price: Optional[str]
+
+
 class ProductScrapeEventSchema(BaseModel):
     uuid: UUID
     asin: str
     title: Optional[str]
+    price: Optional[str]
+
+
+class ProductScrapeEventDetailSchema(BaseModel):
+    asin: str
+    title: Optional[str]
+    price: Optional[str]
+
