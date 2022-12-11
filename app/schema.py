@@ -14,20 +14,20 @@ class ProductSchema(BaseModel):
 class ProductListSchema(BaseModel):
     asin: str
     title: Optional[str]
-    price: Optional[str]
+    price_str: Optional[str]
 
 
 class ProductScrapeEventSchema(BaseModel):
     uuid: uuid.UUID
     asin: str
     title: Optional[str]
-    price: Optional[str]
+    price_str: Optional[str]
 
 
 class ProductScrapeEventDetailSchema(BaseModel):
     asin: str
     title: Optional[str]
-    price: Optional[str]
+    price_str: Optional[str]
     created: Optional[Any] = None
 
     @root_validator(pre=True)
