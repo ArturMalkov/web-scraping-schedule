@@ -64,7 +64,8 @@ def random_task(name):
 
 @celery_app.task
 def get_all_products():
-    print(list(models.Product.objects().all().values_list("asin", flat=True)))
+    query = models.Product.objects().all().values_list("asin", flat=True)
+    print(list(query))
 
 
 @celery_app.task
