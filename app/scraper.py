@@ -2,9 +2,11 @@ import time
 from dataclasses import dataclass
 
 from fake_useragent import UserAgent
+from requests_html import HTML
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.webdriver import WebDriver
+from slugify import slugify
 
 
 def get_user_agent():
@@ -17,6 +19,7 @@ class Scraper:
     endless_scroll: bool = False
     endless_scroll_time: int = 5
     driver: WebDriver = None
+    html_object: HTML = None
 
     def get_driver(self):
         if self.driver is None:
@@ -52,9 +55,81 @@ class Scraper:
 
                 current_height = iteration_height
 
+    def extract_element_text(self, element_requisites):
+        element = self.html_object.find(element_requisites, first=True)
+        if not element:
+            return ""
+        return element.text
+
+    def extract_tables(self):
+        return self.html_object.find("table")
+
+    @staticmethod
+    def extract_table_dataset(tables):
+        dataset = {}
+
+        for table in tables:
+            for tbody in table.element.getchildren():
+                for tr in tbody.getchildren():
+                    row = []
+                    for col in tr.getchildren():
+                        content = ""
+                        try:
+                            content = col.text_content()
+                        except:
+                            pass
+                        if content != "":
+                            _content = content.strip()
+                            row.append(_content)
+                    if len(row) != 2:
+                        continue
+
+                    key, value = row[0], row[1]
+
+                    data = {}
+                    key = slugify(key)
+                    if key in dataset:
+                        continue
+                    else:
+                        if "$" in value:
+                            new_key = key
+                            old_key = f"{key}_raw"
+                            new_value = value
+                            old_value = value
+                            dataset[new_key] = new_value
+                            dataset[old_key] = old_value
+                        else:
+                            dataset[key] = value
+
+        return dataset
+
+    def get_html_object(self):
+        if self.html_object is None:
+            html_str = self.get()
+            self.html_object = HTML(html=html_str)
+        return self.html_object
+
     def get(self):
         driver = self.get_driver()
         driver.get(self.url)
-        self.perform_endless_scroll(driver=driver)
+        if self.endless_scroll:
+            self.perform_endless_scroll(driver=driver)
+        else:
+            time.sleep(10)
 
         return driver.page_source
+
+    def scrape(self):
+        self.get_html_object()
+
+        price_str = self.extract_element_text(".a-price")
+        title_str = self.extract_element_text("#productTitle")
+
+        tables = self.extract_tables()
+        dataset = self.extract_table_dataset(tables)
+
+        return {
+            "price_str": price_str,
+            "title_str": title_str,
+            "asin": dataset.get("asin")
+        }
