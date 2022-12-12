@@ -48,9 +48,7 @@ class Scraper:
 
         if self.endless_scroll:
             # driver.execute_script()
-            current_height = driver.execute_script(
-                "return document.body.scrollHeight"
-            )
+            current_height = driver.execute_script("return document.body.scrollHeight")
             while True:
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
                 time.sleep(self.endless_scroll_time)
@@ -93,7 +91,6 @@ class Scraper:
 
                     key, value = row[0], row[1]
 
-                    data = {}
                     key = slugify(key)
                     if key in dataset:
                         continue

@@ -1,4 +1,3 @@
-import os
 import pathlib
 
 from cassandra.auth import PlainTextAuthProvider
@@ -18,9 +17,7 @@ CLUSTER_BUNDLE = str(BASE_DIR / "ignored" / "connect.zip")
 
 
 def get_cluster():
-    cloud_config = {
-        'secure_connect_bundle': CLUSTER_BUNDLE
-    }
+    cloud_config = {"secure_connect_bundle": CLUSTER_BUNDLE}
     auth_provider = PlainTextAuthProvider(ASTRA_DB_CLIENT_ID, ASTRA_DB_CLIENT_SECRET)
     cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
     return cluster

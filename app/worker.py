@@ -1,21 +1,10 @@
-import pydantic.error_wrappers
 from cassandra.cqlengine import connection
 from cassandra.cqlengine.management import sync_table
 from celery import Celery
 from celery.schedules import crontab
-from celery.signals import (
-    beat_init,  # needed for scheduling tasks
-    worker_process_init
-)
+from celery.signals import beat_init, worker_process_init  # needed for scheduling tasks
 
-from app import (
-    config,
-    crud,
-    db,
-    models,
-    schema,
-    scraper as scraper_service
-)
+from app import config, crud, db, models, schema, scraper as scraper_service
 
 
 celery_app = Celery(__name__)
@@ -55,8 +44,7 @@ def setup_periodic_tasks(sender, *args, **kwargs):
     # )
 
     sender.add_periodic_task(  # to run scraping task every 5 minutes
-        crontab(minute="*/5"),
-        scrape_products.s()
+        crontab(minute="*/5"), scrape_products.s()
     )
 
 

@@ -15,7 +15,7 @@ session = None
 def on_startup():
     global session
     session = db.get_session()
-    sync_table(models.Product)
+    sync_table(models.Product)  # to avoid running migrations
     sync_table(models.ProductScrapeEvent)
 
 
@@ -27,14 +27,21 @@ def get_all_products():
 @app.get("/products/{asin}")
 def get_product_by_asin(asin: str):
     data = dict(models.Product.objects.get(asin=asin))
-    events = list(schema.ProductScrapeEventDetailSchema(**scrape_event)
-                  for scrape_event in models.ProductScrapeEvent.objects().filter(asin=asin).limit(5))
+    events = list(
+        schema.ProductScrapeEventDetailSchema(**scrape_event)
+        for scrape_event in models.ProductScrapeEvent.objects()
+        .filter(asin=asin)
+        .limit(5)
+    )
     data["events"] = events
     data["events_url"] = f"/products/{asin}/events"
     return data
 
 
-@app.get("/products/{asin}/events", response_model=list[schema.ProductScrapeEventDetailSchema])
+@app.get(
+    "/products/{asin}/events",
+    response_model=list[schema.ProductScrapeEventDetailSchema],
+)
 def get_product_scrape_events(asin: str):
     events = list(models.ProductScrapeEvent.objects().filter(asin=asin).limit(5))
     return events

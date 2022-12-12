@@ -31,6 +31,8 @@ class ProductScrapeEventDetailSchema(BaseModel):
     created: Optional[Any] = None
 
     @root_validator(pre=True)
-    def extra_create_time_from_uuid(cls, values):  # assume that datetime from uuid is 'created' time
+    def extra_create_time_from_uuid(
+        cls, values
+    ):  # assume that datetime from uuid is 'created' time
         values["created"] = utils.uuid1_time_to_datetime(values["uuid"].time)
         return values
