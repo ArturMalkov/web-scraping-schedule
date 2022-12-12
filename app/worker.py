@@ -1,3 +1,4 @@
+import pydantic.error_wrappers
 from cassandra.cqlengine import connection
 from cassandra.cqlengine.management import sync_table
 from celery import Celery
@@ -9,8 +10,11 @@ from celery.signals import (
 
 from app import (
     config,
+    crud,
     db,
-    models
+    models,
+    schema,
+    scraper as scraper_service
 )
 
 
@@ -70,7 +74,16 @@ def get_all_products():
 
 @celery_app.task
 def scrape_asin(asin):
-    print(asin)
+    scraper = scraper_service.Scraper(asin=asin, endless_scroll=True)
+    dataset = scraper.scrape()
+    try:
+        validated_data = schema.ProductListSchema(**dataset)
+    except:
+        validated_data = None
+
+    if validated_data is not None:
+        product, _ = crud.add_scrape_event(validated_data.dict())
+        return product
 
 
 @celery_app.task
